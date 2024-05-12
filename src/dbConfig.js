@@ -8,4 +8,16 @@ const db = MySQL.createConnection({
   database: process.env.DB_DATABASE,
 });
 
+const cekDbConnection = () => {
+  db.connect((err) => {
+    if (err) {
+      console.log(`error DB connecting: ${err.stack}`);
+      throw err;
+    }
+    console.log(`DB is connected as id ${db.threadId}`);
+  });
+};
+
+cekDbConnection();
+
 module.exports = db;
