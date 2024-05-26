@@ -3,38 +3,26 @@ import pandas as pd
 # Load the dataset
 data = pd.read_csv('data_balita.csv')
 
-# Display the first few rows of the dataset
-print("Initial dataset:")
-print(data.head())
+# Check for missing values in the dataset
+missing_values = data.isnull().sum()
 
-# Handling missing values
-# Fill missing values with the mean for numerical columns and the mode for categorical columns
-data['age'].fillna(data['age'].mean(), inplace=True)
-data['gender'].fillna(data['gender'].mode()[0], inplace=True)
-data['height'].fillna(data['height'].mean(), inplace=True)
-data['nutritional_status'].fillna(data['nutritional_status'].mode()[0], inplace=True)
+# Display the number of missing values for each column
+print("Missing values in each column:")
+print(missing_values)
 
-# Encode categorical variables
-# Gender: Assuming 'M' for male and 'F' for female
-data['gender'] = data['gender'].map({'M': 1, 'F': 0})
-
-# Nutritional Status: Convert categorical nutritional status to numerical values
-# First, find the unique values in the nutritional_status column
-unique_nutritional_status = data['nutritional_status'].unique()
-# Create a mapping from unique values to numerical values
-nutritional_status_mapping = {status: idx for idx, status in enumerate(unique_nutritional_status)}
-# Apply the mapping
-data['nutritional_status'] = data['nutritional_status'].map(nutritional_status_mapping)
-
-# Normalize numerical variables
-data['age'] = (data['age'] - data['age'].mean()) / data['age'].std()
-data['height'] = (data['height'] - data['height'].mean()) / data['height'].std()
-
-# Display the preprocessed dataset
-print("\nPreprocessed dataset:")
-print(data.head())
-
-# Save the preprocessed dataset to a new CSV file
-data.to_csv('preprocessed_data_balita.csv', index=False)
-
-print("\nPreprocessed data saved to 'preprocessed_data_balita.csv'")
+# Check if there are any missing values in the dataset
+if missing_values.any():
+    print("\nThere are missing values in the dataset. Deleting rows with missing values...")
+    # Drop rows with missing values
+    data_cleaned = data.dropna()
+    # Display the first few rows of the cleaned dataset
+    print("\nCleaned dataset:")
+    print(data_cleaned.head())
+    # Save the cleaned dataset to a new CSV file
+    data_cleaned.to_csv('cleaned_data_balita.csv', index=False)
+    print("\nCleaned data saved to 'cleaned_data_balita.csv'")
+else:
+    print("\nThere are no missing values in the dataset.")
+    # Optionally, you can save the original dataset if there are no missing values
+    data.to_csv('cleaned_data_balita.csv', index=False)
+    print("\nOriginal data saved to 'cleaned_data_balita.csv'")
