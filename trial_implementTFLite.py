@@ -4,14 +4,14 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 
 # Load the data from the CSV file
-data = pd.read_csv('Stunting_30.csv')
+data = pd.read_csv('Stunting_Testing.csv')
 
 # Preprocess the data
 data['gender'] = data['gender'].map({'male': 0, 'female': 1})
 
 # Split the data into features and labels
 X = data[['age', 'gender', 'weight', 'height']]
-y = data['Stunting']
+y = data['Stunting_Status']
 
 # Normalize the data
 X = X / X.max()
