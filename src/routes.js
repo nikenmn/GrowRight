@@ -1,7 +1,6 @@
 const {
   registerUser,
   homePage,
-  dbConnection,
 } = require('./handler');
 
 const routes = [
@@ -13,13 +12,10 @@ const routes = [
   {
     method: 'GET',
     path: '/',
+    config: {
+      auth: 'jwt',
+    },
     handler: homePage,
-  },
-  {
-    // Bermasalah
-    method: 'GET',
-    path: '/users',
-    handler: dbConnection,
   },
 ];
 

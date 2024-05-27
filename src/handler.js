@@ -1,4 +1,8 @@
+const JWT = require('jsonwebtoken');
 const db = require('./dbConfig');
+require('dotenv').config();
+
+const secret = process.env.JWT_SECRET;
 
 const registerUser = async (request, h) => {
   const { userName, email, password } = request.payload;
@@ -78,6 +82,8 @@ const registerUser = async (request, h) => {
     return response;
   }
 
+  const token = await JWT.sign(email, secret); // synchronous
+
   await createAccount(newUser);
   const response = h.response({
     status: 'success',
@@ -86,19 +92,27 @@ const registerUser = async (request, h) => {
       userName,
       email,
     },
+    token: `${token}`,
   });
   response.code(201);
   return response;
 };
 
-const homePage = () => ({
-  status: 'success',
-});
+const homePage = (request, h) => {
+  const response = h.response({
+    status: 'success',
+    message: 'You used a Valid JWT Token to access',
+  });
+  response.headers('Authorization', request.headers.authorization);
+  response.code(200);
+  return response;
+};
 
 const dbConnection = () => {
 };
 
 module.exports = {
+  secret,
   registerUser,
   homePage,
   dbConnection,
