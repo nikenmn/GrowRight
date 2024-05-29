@@ -1,23 +1,53 @@
-const jwt = require('jsonwebtoken');
 const { nanoid } = require('nanoid');
 
 // inport
 const signToken = require('../controller/authController');
-const users = require('./users');
+const emailValidation = require('../validator/emailValidator');
+const { containsSymbolAndNumber, passwordLengthValidation, isValidPassword } = require('../validator/PasswordValidator');
+const { createUser, getUserByEmail, isEmailExists } = require('../model/userModel');
 
 const registerUser = async (request, h) => {
   const { userName, email, password } = request.payload;
 
-  const id = nanoid(6);
+  if (!emailValidation(email)) {
+    const response = h.response({
+      status: 'fail',
+      message: 'Invalid email',
+    });
+    response.code(400);
+    return response;
+  }
 
-  const user = {
-    id,
-    userName,
-    email,
-    password,
-  };
+  if (!passwordLengthValidation(password)) {
+    const response = h.response({
+      status: 'fail',
+      message: 'Password must be at least 8 characters long',
+    });
+    response.code(400);
+    return response;
+  }
 
-  users.push(user);
+  if (!containsSymbolAndNumber(password)) {
+    const response = h.response({
+      status: 'fail',
+      message: 'Password must contain at least one symbol and number',
+    });
+    response.code(400);
+    return response;
+  }
+
+  if (await isEmailExists(email)) {
+    const response = h.response({
+      status: 'fail',
+      message: 'Email already registered',
+    });
+    response.code(400);
+    return response;
+  }
+
+  const userId = nanoid(6);
+
+  createUser(userId, userName, email, password);
 
   const response = h.response({
     status: 'success',
@@ -30,7 +60,7 @@ const registerUser = async (request, h) => {
 const loginHandler = async (request, h) => {
   const { email, password } = request.payload;
 
-  const isUser = users.find((user) => user.email === email);
+  const isUser = await getUserByEmail(email);
 
   if (!isUser) {
     const response = h.response({
@@ -41,7 +71,7 @@ const loginHandler = async (request, h) => {
     return response;
   }
 
-  if (isUser.password !== password) {
+  if (await isValidPassword(password, isUser.password) === false) {
     const response = h.response({
       status: 'fail',
       message: 'Wrong password',
@@ -50,12 +80,12 @@ const loginHandler = async (request, h) => {
     return response;
   }
 
-  const token = signToken(isUser.id);
+  const token = signToken(isUser.email);
   const response = h.response({
     status: 'success',
     message: 'Login success',
     data: {
-      id: isUser.id,
+      userId: isUser.userId,
       userName: isUser.userName,
       email: isUser.email,
     },
@@ -65,10 +95,21 @@ const loginHandler = async (request, h) => {
   return response;
 };
 
-const getUser = async (request, h) => ({
-  text: 'You have accessed a protected route',
-  user: request.auth.credentials,
-});
+const getUser = async (request, h) => {
+  // disini bermasalah
+  const { u } = request.auth.credentials;
+
+  const user = getUserByEmail(u);
+
+  const response = h.response({
+    status: 'success',
+    data: {
+      user,
+    },
+  });
+  response.code(200);
+  return response;
+};
 
 module.exports = {
   registerUser,
