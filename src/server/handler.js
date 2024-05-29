@@ -96,15 +96,16 @@ const loginHandler = async (request, h) => {
 };
 
 const getUser = async (request, h) => {
-  // disini bermasalah
-  const { u } = request.auth.credentials;
+  const { credentials } = request.auth;
 
-  const user = getUserByEmail(u);
+  const { userId, userName, email } = await getUserByEmail(credentials.email);
 
   const response = h.response({
     status: 'success',
     data: {
-      user,
+      userId,
+      userName,
+      email,
     },
   });
   response.code(200);
