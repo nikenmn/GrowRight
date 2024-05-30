@@ -12,9 +12,20 @@ const createUser = async (userId, userName, email, password) => {
   );
   return result;
 };
+const updateUser = async (userId, userName, email, noHp) => {
+  const [result] = await db.query(
+    'UPDATE users SET username = ?, email = ?, noHp = ? WHERE userId = ?',
+    [userName, email, noHp, userId],
+  );
+  return result;
+};
 
 const getUserByEmail = async (email) => {
   const [rows] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+  return rows[0];
+};
+const getUserById = async (userId) => {
+  const [rows] = await db.query('SELECT * FROM users WHERE userId = ?', [userId]);
   return rows[0];
 };
 
@@ -26,6 +37,8 @@ const isEmailExists = async (str) => {
 
 module.exports = {
   createUser,
+  updateUser,
   getUserByEmail,
+  getUserById,
   isEmailExists,
 };
