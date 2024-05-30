@@ -4,7 +4,13 @@ const { nanoid } = require('nanoid');
 const signToken = require('../controller/authController');
 const emailValidation = require('../validator/emailValidator');
 const { containsSymbolAndNumber, passwordLengthValidation, isValidPassword } = require('../validator/PasswordValidator');
-const { createUser, getUserByEmail, isEmailExists } = require('../model/userModel');
+const {
+  createUser,
+  updateUser,
+  getUserByEmail,
+  getUserById,
+  isEmailExists,
+} = require('../model/userModel');
 
 const registerUser = async (request, h) => {
   const { userName, email, password } = request.payload;
@@ -47,7 +53,7 @@ const registerUser = async (request, h) => {
 
   const userId = nanoid(6);
 
-  createUser(userId, userName, email, password);
+  await createUser(userId, userName, email, password);
 
   const response = h.response({
     status: 'success',
@@ -80,7 +86,7 @@ const loginHandler = async (request, h) => {
     return response;
   }
 
-  const token = signToken(isUser.email);
+  const token = signToken(isUser.userId, isUser.email);
   const response = h.response({
     status: 'success',
     message: 'Login success',
@@ -112,8 +118,90 @@ const getUser = async (request, h) => {
   return response;
 };
 
+const getUserProfile = async (request, h) => {
+  const { credentials } = request.auth;
+  const { userId } = request.params;
+
+  if (credentials.userId !== userId) {
+    const response = h.response({
+      status: 'fail',
+      message: 'Unauthorized',
+    });
+    response.code(401);
+    return response;
+  }
+
+  const user = await getUserById(userId);
+
+  const response = h.response({
+    status: 'success',
+    data: {
+      userId: user.userId,
+      userName: user.userName,
+      email: user.email,
+      createDat: user.createDat,
+      updateDat: user.updateDat,
+    },
+  });
+  response.code(200);
+  return response;
+};
+
+const editUserProfile = async (request, h) => {
+  const { credentials } = request.auth;
+  const { userId } = request.params;
+  const { userName, email, noHp } = request.payload;
+
+  if (credentials.userId !== userId) {
+    const response = h.response({
+      status: 'fail',
+      message: 'Unauthorized',
+    });
+    response.code(401);
+    return response;
+  }
+
+  if (!emailValidation(email)) {
+    const response = h.response({
+      status: 'fail',
+      message: 'Invalid email',
+    });
+    response.code(400);
+    return response;
+  }
+
+  if (await isEmailExists(email)) {
+    const response = h.response({
+      status: 'fail',
+      message: 'Email already registered',
+    });
+    response.code(400);
+    return response;
+  }
+
+  await updateUser(userId, userName, email, noHp);
+  const user = await getUserById(userId);
+
+  const response = h.response({
+    status: 'success',
+    message: 'User has been updated',
+    data: {
+      userId: user.userId,
+      userName: user.userName,
+      email: user.email,
+      noHp: user.noHp,
+      createDat: user.createDat,
+      updateDat: user.updateDat,
+    },
+  });
+  response.code(200);
+  return response;
+};
+
 module.exports = {
   registerUser,
   loginHandler,
   getUser,
+  getUserProfile,
+  editUserProfile,
 };
