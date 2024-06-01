@@ -161,13 +161,15 @@ const editUserProfile = async (request, h) => {
     return response;
   }
 
-  if (!emailValidation(email)) {
-    const response = h.response({
-      status: 'fail',
-      message: 'Invalid email',
-    });
-    response.code(400);
-    return response;
+  if (email !== '') {
+    if (!emailValidation(email)) {
+      const response = h.response({
+        status: 'fail',
+        message: 'Invalid email',
+      });
+      response.code(400);
+      return response;
+    }
   }
 
   if (await isEmailExists(email)) {

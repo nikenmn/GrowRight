@@ -1,3 +1,6 @@
+# Manual
+cloud_sql_proxy
+
 # Logs
 logs
 *.log

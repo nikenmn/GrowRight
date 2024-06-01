@@ -12,11 +12,37 @@ const createUser = async (userId, userName, email, password) => {
   );
   return result;
 };
+// const updateUser = async (userId, userName, email, noHp) => {
+//   const [result] = await db.query(
+//     'UPDATE users SET username = ?, email = ?, noHp = ? WHERE userId = ?',
+//     [userName, email, noHp, userId],
+//   );
+//   return result;
+// };
 const updateUser = async (userId, userName, email, noHp) => {
-  const [result] = await db.query(
-    'UPDATE users SET username = ?, email = ?, noHp = ? WHERE userId = ?',
-    [userName, email, noHp, userId],
-  );
+  let query = 'UPDATE users SET ';
+  const params = [];
+
+  if (userName) {
+    query += 'userName = ?, ';
+    params.push(userName);
+  }
+  if (email) {
+    query += 'email = ?, ';
+    params.push(email);
+  }
+  if (noHp) {
+    query += 'noHp = ?, ';
+    params.push(noHp);
+  }
+
+  // Hapus koma terakhir dan tambahkan WHERE clause
+  // query = query.slice(0, -2) + ' WHERE userId = ?';
+  query = `${query.slice(0, -2)} WHERE userId = ?`;
+  params.push(userId);
+
+  // Eksekusi query
+  const [result] = await db.query(query, params);
   return result;
 };
 
