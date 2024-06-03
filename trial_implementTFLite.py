@@ -1,7 +1,9 @@
 import pandas as pd
 import numpy as np
-import tensorflow as tf # type: ignore
+import tensorflow as tf
 import matplotlib.pyplot as plt
+
+print(tf.__version__)
 
 # Load the data from the CSV file
 data = pd.read_csv('Stunting_Testing.csv')
