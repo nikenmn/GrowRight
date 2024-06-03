@@ -1,4 +1,5 @@
 const Hapi = require('@hapi/hapi');
+const Bell = require('@hapi/bell');
 const HapiAuthJWT2 = require('hapi-auth-jwt2');
 require('dotenv').config();
 
@@ -9,8 +10,7 @@ const InputError = require('../exceptions/InputError');
 (async () => {
   const server = Hapi.server({
     port: 3000,
-    // host: '0.0.0.0',
-    host: 'localhost',
+    host: process.env.NODE_ENV ? '0.0.0.0' : 'localhost',
     routes: {
       cors: {
         origin: ['*'],
@@ -18,9 +18,18 @@ const InputError = require('../exceptions/InputError');
     },
   });
 
-  await server.register(HapiAuthJWT2);
+  await server.register([Bell, HapiAuthJWT2]);
 
-  const validate = async (decoded, request, h) => ({ isValid: true });
+  // Menetapkan strategi otentikasi menggunakan Bell dengan penyedia Google
+  server.auth.strategy('google', 'bell', {
+    provider: 'google',
+    password: process.env.COOKIE_ENCRYPTION_PASSWORD,
+    clientId: process.env.CLIENT_ID,
+    clientSecret: process.env.CLIENT_SECRET,
+    isSecure: process.env.NODE_ENV === 'production',
+  });
+
+  const validate = async () => ({ isValid: true });
 
   server.auth.strategy('jwt', 'jwt', {
     key: process.env.JWT_SECRET,

@@ -101,6 +101,53 @@ const loginHandler = async (request, h) => {
   return response;
 };
 
+const loginGoogleHandler = async (request, h) => {
+  if (!request.auth.isAuthenticated) {
+    return `Authentication failed due to: ${request.auth.error.message}`;
+  }
+
+  // Mendapatkan informasi profil pengguna dari Google
+  const { profile } = request.auth.credentials;
+
+  // Mengecek apakah pengguna sudah terdaftar
+  const isUser = await getUserByEmail(profile.email);
+
+  if (!isUser) {
+    const userId = nanoid(6);
+    // Memasukkan informasi profil pengguna ke dalam database
+    await createUser(userId, profile.displayName, profile.email, '');
+
+    const token = signToken(userId, profile.email);
+
+    const response = h.response({
+      status: 'success',
+      message: 'User has been registered',
+      data: {
+        userId,
+        userName: profile.displayName,
+        email: profile.email,
+      },
+      token,
+    });
+    response.code(201);
+    return response;
+  }
+
+  const token = signToken(isUser.userId, isUser.email);
+  const response = h.response({
+    status: 'success',
+    message: 'Login success',
+    data: {
+      userId: isUser.userId,
+      userName: isUser.userName,
+      email: isUser.email,
+    },
+    token,
+  });
+  response.code(200);
+  return response;
+};
+
 const getUser = async (request, h) => {
   const { credentials } = request.auth;
 
@@ -139,6 +186,7 @@ const getUserProfile = async (request, h) => {
       userId: user.userId,
       userName: user.userName,
       email: user.email,
+      noHp: user.noHp,
       createDat: user.createDat,
       updateDat: user.updateDat,
     },
@@ -203,6 +251,7 @@ const editUserProfile = async (request, h) => {
 module.exports = {
   registerUser,
   loginHandler,
+  loginGoogleHandler,
   getUser,
   getUserProfile,
   editUserProfile,
