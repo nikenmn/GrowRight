@@ -5,21 +5,13 @@ from sklearn.svm import SVC
 from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
 
 # Load the dataset
-df = pd.read_csv('Stunting_cleanedAndFix.csv')
-
-# Preprocess the data
-# Drop 'Birth Weight' and 'Birth Length' columns if they exist
-columns_to_drop = ['Birth Weight', 'Birth Length']
-df = df.drop(columns=[col for col in columns_to_drop if col in df.columns])
-
-# Rename columns 'Body Weight' to 'weight' and 'Body Height' to 'height'
-df = df.rename(columns={'Body Weight': 'weight', 'Body Height': 'height'})
+df = pd.read_csv('Stunting_Training.csv')
 
 # Encode gender as numerical values (assuming 'gender' column has 'Male' and 'Female')
-df['gender'] = df['gender'].map({'Male': 1, 'Female': 0})
+df['Gender'] = df['Gender'].map({'Male': 1, 'Female': 0})
 
 # Separate features and target
-X = df[['age', 'gender', 'weight', 'height']]
+X = df[['Age', 'Gender', 'Weight', 'Height']]
 y = df['Stunting']  # Assuming the target column is named 'Stunting'
 
 # Split the data into training and testing sets
