@@ -1,6 +1,7 @@
 const {
   registerUser,
   loginHandler,
+  loginGoogleHandler,
   getUser,
   getUserProfile,
   editUserProfile,
@@ -22,6 +23,14 @@ const routes = [
       auth: false,
     },
     handler: loginHandler,
+  },
+  {
+    method: ['GET', 'POST'],
+    path: '/login-google',
+    options: {
+      auth: 'google',
+    },
+    handler: loginGoogleHandler,
   },
   {
     method: 'GET',
