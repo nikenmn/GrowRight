@@ -11,6 +11,7 @@ This API provides endpoints for user registration, login, retrieving user inform
   - [Endpoints](#endpoints)
     - [Register User](#register-user)
     - [Login User](#login-user)
+    - [Login Google](#login-google)
     - [Get User](#get-user)
     - [Get User Profile](#get-user-profile)
     - [Edit User Profile](#edit-user-profile)
@@ -117,6 +118,50 @@ This API provides endpoints for user registration, login, retrieving user inform
     {
       "status": "fail",
       "message": "Wrong password"
+    }
+    ```
+
+### Login Google
+
+**Endpoint** `/login-google`
+
+**Method:** `GET`or`POST`
+
+**Authentication:** No
+
+**Rquest**
+
+- No specific request body is needed. This endpoint uses Google OAuth for authentication
+
+**Responses:**
+
+- **200 OK**
+  - **Body:**
+    ```json
+    {
+      "status": "success",
+      "message": "Login success"
+      "data": {
+        "userId": "<userId>",
+        "userName": "<userName>",
+        "email": "<email>"
+      }
+    "token": "<JWT Token>"
+    }
+    ```
+
+- **201 OK**
+  - **Body:**
+    ```json
+    {
+      "status": "success",
+      "message": "User has been registered"
+      "data": {
+        "userId": "<userId>",
+        "userName": "<userName>",
+        "email": "<email>"
+      }
+    "token": "<JWT Token>"
     }
     ```
 
