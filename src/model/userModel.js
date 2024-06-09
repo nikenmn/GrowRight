@@ -1,10 +1,11 @@
 const bcrypt = require('bcrypt');
-const db = require('../config/database');
+const initializeDb = require('../config/database');
 
 const saltRounds = 10;
 
 // Fungsi untuk membuat pengguna baru
 const createUser = async (userId, userName, email, password) => {
+  const db = await initializeDb();
   const hashedPassword = await bcrypt.hash(password, saltRounds);
   const [result] = await db.query(
     'INSERT INTO users (userId, username, email, password) VALUES (?, ?, ?, ?)',
@@ -20,6 +21,7 @@ const createUser = async (userId, userName, email, password) => {
 //   return result;
 // };
 const updateUser = async (userId, userName, email, noHp) => {
+  const db = await initializeDb();
   let query = 'UPDATE users SET ';
   const params = [];
 
@@ -47,15 +49,18 @@ const updateUser = async (userId, userName, email, noHp) => {
 };
 
 const getUserByEmail = async (email) => {
+  const db = await initializeDb();
   const [rows] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
   return rows[0];
 };
 const getUserById = async (userId) => {
+  const db = await initializeDb();
   const [rows] = await db.query('SELECT * FROM users WHERE userId = ?', [userId]);
   return rows[0];
 };
 
 const isEmailExists = async (str) => {
+  const db = await initializeDb();
   const query = 'SELECT email FROM users WHERE email = ?';
   const [rows] = await db.query(query, [str]);
   return rows.length > 0;
