@@ -1,0 +1,12 @@
+# Membuat dan mengaktifkan virtual environment
+python -m venv venv
+source venv/bin/activate
+
+# instal dependensi
+pip install -r requirements.txt
+
+# Menjalankan
+python app.py
+
+# Untuk keluar dari venv
+deactivate
