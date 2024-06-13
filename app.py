@@ -1,59 +1,71 @@
-from tensorflow import keras
 from flask import Flask, request, jsonify, make_response
+import joblib
 import numpy as np
-import pandas as pd
+import tensorflow as tf
 import os
 
 app = Flask(__name__)
 
-# Memuat model
-model = keras.models.load_model("model.h5")
+# Muat scaler dan model TensorFlow saat aplikasi dimulai
+normalization_model = "model/normalization_model.joblib"
+scaler = joblib.load(normalization_model)
 
-def transform_to_percentile(value):
-    if value < 0:
-        return max(0, 100 - (abs(value) * 100))  # untuk rentang -1 ke 0 menjadi 100% ke 0%, minimal 0%
-    else:
-        return min(100, value * 100)  # untuk rentang 0 ke 1 menjadi 0% ke 100%, maksimal 100%
+tensorflow_model = "model/model.h5"
+model = tf.keras.models.load_model(tensorflow_model)
+
+# def genderEncode(gender, age, weight, height):
+#     gender_encoding = {'male': 1, 'female': 0}
+#     gender_encoded = gender_encoding.get(gender)
+#     return gender_encoded, age, weight, height
+
+def normalize_data(gender, age, weight, height):
+    feature = np.array([[gender, age, weight, height]])
+    normalized_data = scaler.transform(feature)
+    return normalized_data
 
 @app.route("/predict", methods=["POST"])
 def predict():
     apikey = request.headers.get('apikey')
     
-    # Validasi API key dan input
-    if apikey != "B1sM1Llaht0pi5C4p5t0N3":
+    # Validasi API key
+    if apikey != os.getenv("API_KEY"):
         return make_response(jsonify({"status": "error", "message": "API key is invalid"}), 401)
     
     try:
         data = request.get_json()
         if not data:
-            return jsonify({"error": "Missing JSON data"})
+            return jsonify({"error": "Missing JSON data"}), 400
         
-        # Pastikan data yang diperlukan ada dalam format yang benar
-        required_features = ['age', 'weight', 'height', 'gender_male']
+        # Validasi input data
+        required_features = ['gender', 'age', 'weight', 'height']
         for feature in required_features:
             if feature not in data:
-                return jsonify({"error": f"Missing {feature} in the request data"})
+                return jsonify({"error": f"Missing {feature} in the request data"}), 400
 
-        # Prediksi menggunakan model
-        X = pd.DataFrame(data, index=[0])  # Membuat DataFrame dari data
-        predictions = model.predict(X)
-
-        # Transformasi stuntingpercentage ke skala 0-100%
-        predictions[:, 3] = [transform_to_percentile(value) for value in predictions[:, 3]]
+        gender = data['gender']
+        age = data['age']
+        weight = data['weight']
+        height = data['height']
+        
+        # Proses data
+        # gender, age, weight, height = genderEncode(gender_encoded, age, weight, height)
+        normalized_data = normalize_data(gender, age, weight, height)
+        predictions = model.predict(normalized_data)
+        formatted_predictions = [f'{value:.2f}' for value in predictions[0]]
         
         # Buat respons dalam format JSON
         response = {
-            "age": data['age'],
-            "weight": data['weight'],
-            "height": data['height'],
-            "gender": "male" if data['gender_male'] == 1 else "female",
-            "stuntingpercentage": predictions[:, 3].tolist()
+            "gender": gender,
+            "age": age,
+            "height": height,
+            "weight": weight,
+            "formatted_predictions": formatted_predictions
         }
 
         return jsonify(response)
     
     except Exception as e:
-        return jsonify({"error": str(e)})
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))

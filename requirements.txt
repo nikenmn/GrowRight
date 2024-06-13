@@ -1,4 +1,5 @@
-tensorflow
+tensorflow==2.9.1
 flask
 numpy
 pandas
+scikit-learn
