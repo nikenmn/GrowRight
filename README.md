@@ -197,18 +197,18 @@ This API provides endpoints for user registration, login, retrieving user inform
       "message": "Prediction success",
       "data": {
         "input": {
-          "name": "Bayu",
-          "gender": 0,
-          "age": 40,
-          "weight": 15,
-          "height": 95
+          "name": <string>,
+          "gender": <bolean>,
+          "age": <int>,
+          "weight": <decimal>,
+          "height": <decimal>
         },
         "prediction": {
-          "zsWeightAge": "0.05",
-          "zsHeightAge": "-0.60",
-          "zsWeightHeight": "0.46",
-          "zsTotal": "-0.26",
-          "zsTotalPercentage": "7.18"
+          "zsWeightAge": <decimal>,
+          "zsHeightAge": <decimal>,
+          "zsWeightHeight": <decimal>,
+          "zsTotal": <decimal>,
+          "zsTotalPercentage":<decimal>
         }
       }
     }
