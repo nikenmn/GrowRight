@@ -23,12 +23,15 @@ def normalize_data(gender, age, weight, height):
     normalized_data = scaler.transform(feature)
     return normalized_data
 
+# Ambil API key dari environment variables
+API_KEY = os.getenv("API_KEY")
+
 @app.route("/predict", methods=["POST"])
 def predict():
     apikey = request.headers.get('apikey')
     
     # Validasi API key
-    if apikey != os.getenv("API_KEY"):
+    if apikey != API_KEY:
         return make_response(jsonify({"status": "error", "message": "API key is invalid"}), 401)
     
     try:
