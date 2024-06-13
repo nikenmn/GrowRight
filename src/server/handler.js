@@ -1,4 +1,5 @@
 const { nanoid } = require('nanoid');
+const axios = require('axios');
 
 // inport
 const signToken = require('../controller/authController');
@@ -248,6 +249,86 @@ const editUserProfile = async (request, h) => {
   return response;
 };
 
+const predictionHandler = async (request, h) => {
+  const { credentials } = request.auth;
+  const { userId } = request.params;
+  const {
+    name,
+    gender,
+    age,
+    height,
+    weight,
+  } = request.payload;
+
+  if (credentials.userId !== userId) {
+    const response = h.response({
+      status: 'fail',
+      message: 'Unauthorized',
+    });
+    response.code(401);
+    return response;
+  }
+
+  if (!name || !age || !height || !weight) {
+    const response = h.response({
+      status: 'fail',
+      message: 'Missing required field',
+    });
+    response.code(400);
+    return response;
+  }
+
+  if (gender !== 1 && gender !== 0) {
+    const response = h.response({
+      status: 'fail',
+      message: 'Gender most be 1 or 0',
+    });
+    response.code(400);
+    return response;
+  }
+
+  const data = {
+    gender,
+    age,
+    weight,
+    height,
+  };
+
+  const options = {
+    url: 'http://34.101.116.202:8080/predict',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: 'B1sM1Llaht0pi5C4p5t0N3',
+    },
+  };
+
+  const apiResponse = await axios.post(options.url, data, {
+    headers: options.headers,
+  });
+
+  const prediction = apiResponse.data.formatted_predictions;
+
+  const response = h.response({
+    status: 'success',
+    message: 'Prediction success',
+    data: {
+      input: {
+        name,
+        ...data,
+      },
+      prediction: {
+        zsWeightAge: prediction[0],
+        zsHeightAge: prediction[1],
+        zsWeightHeight: prediction[2],
+        zsTotal: prediction[3],
+        zsTotalPercentage: prediction[4],
+      },
+    },
+  });
+  response.code(200);
+  return response;
+};
+
 module.exports = {
   registerUser,
   loginHandler,
@@ -255,4 +336,5 @@ module.exports = {
   getUser,
   getUserProfile,
   editUserProfile,
+  predictionHandler,
 };

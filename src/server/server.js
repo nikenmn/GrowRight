@@ -26,7 +26,8 @@ const InputError = require('../exceptions/InputError');
     password: process.env.COOKIE_ENCRYPTION_PASSWORD,
     clientId: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
-    isSecure: process.env.NODE_ENV === 'production',
+    isSecure: false,
+    // isSecure: process.env.NODE_ENV !== 'production',
   });
 
   const validate = async () => ({ isValid: true });
