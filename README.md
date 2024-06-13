@@ -12,6 +12,7 @@ This API provides endpoints for user registration, login, retrieving user inform
     - [Register User](#register-user)
     - [Login User](#login-user)
     - [Login Google](#login-google)
+    - [Prediction](#prediction)
     - [Get User](#get-user)
     - [Get User Profile](#get-user-profile)
     - [Edit User Profile](#edit-user-profile)
@@ -164,6 +165,54 @@ This API provides endpoints for user registration, login, retrieving user inform
     "token": "<JWT Token>"
     }
     ```
+
+### Prediction
+
+**Endpoint:** `/prediction/{userId}`
+
+**Method:** `POST`
+
+**Authentication:** Yes
+
+**Request:**
+
+- **Headers:**
+  - `Authorization: Bearer <JWT Token>`
+- **Path Parameters:**
+  - `userId` (string) - ID of the user
+- **Body Parameters:**
+  - `name` (string) - Name for prediction
+  - `gender` (bolean) - 1 for Male and 0 for Female
+  - `age` (int) - Age in months
+  - `weight` (decimal) - Body weight kg
+  - `height` (decimal) - Height in cm
+
+**Responses:**
+
+- **200 OK**
+  - **Body:**
+    ```json
+    {
+      "status": "success",
+      "message": "Prediction success",
+      "data": {
+        "input": {
+          "name": "Bayu",
+          "gender": 0,
+          "age": 40,
+          "weight": 15,
+          "height": 95
+        },
+        "prediction": {
+          "zsWeightAge": "0.05",
+          "zsHeightAge": "-0.60",
+          "zsWeightHeight": "0.46",
+          "zsTotal": "-0.26",
+          "zsTotalPercentage": "7.18"
+        }
+      }
+    }
+```
 
 ### Get User
 
