@@ -197,11 +197,11 @@ This API provides endpoints for user registration, login, retrieving user inform
       "message": "Prediction success",
       "data": {
         "input": {
-          "name": <string>,
-          "gender": <bolean>,
-          "age": <int>,
-          "weight": <decimal>,
-          "height": <decimal>
+          "name": <name>,
+          "gender": <gender>,
+          "age": <age>,
+          "weight": <weight>,
+          "height": <height>
         },
         "prediction": {
           "zsWeightAge": <decimal>,
@@ -212,7 +212,7 @@ This API provides endpoints for user registration, login, retrieving user inform
         }
       }
     }
-```
+   ```
 
 ### Get User
 
