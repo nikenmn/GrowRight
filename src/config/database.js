@@ -26,10 +26,27 @@ const connectWithConnector = async (config) => {
   return mysql.createPool(dbConfig);
 };
 
-// Menginisialisasi koneksi ke database
+// Fungsi untuk menginisialisasi koneksi ke database lokal
+const connectWithLocalhost = async (config) => {
+  const dbConfig = {
+    host: process.env.LOCAL_DB_HOST || 'localhost',
+    user: process.env.LOCAL_DB_USER,
+    password: process.env.LOCAL_DB_PASSWORD,
+    database: process.env.LOCAL_DB_DATABASE,
+    ...config,
+  };
+  return mysql.createPool(dbConfig);
+};
+
+// Fungsi untuk menginisialisasi koneksi ke database berdasarkan lingkungan
 const initializeDb = async () => {
   try {
-    const db = await connectWithConnector({});
+    let db;
+    if (process.env.NODE_ENV === 'development') {
+      db = await connectWithLocalhost({});
+    } else {
+      db = await connectWithConnector({});
+    }
     return db;
   } catch (err) {
     console.error('Error initializing the database connection:', err.stack);
