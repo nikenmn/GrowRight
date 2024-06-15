@@ -1,6 +1,7 @@
 # Manual
 cloud_sql_proxy
 credential.json
+test.js
 
 # Logs
 logs
