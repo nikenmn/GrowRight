@@ -3,8 +3,12 @@ const axios = require('axios');
 
 // inport
 const signToken = require('../controller/authController');
+const {
+  calculateBMI, classifyBMI, classifyWeightStatus, conclusionClassify,
+} = require('../controller/predictDecriptionController');
 const emailValidation = require('../validator/emailValidator');
 const { containsSymbolAndNumber, passwordLengthValidation, isValidPassword } = require('../validator/PasswordValidator');
+const { createPrediction } = require('../model/predictionModel');
 const {
   createUser,
   updateUser,
@@ -307,6 +311,26 @@ const predictionHandler = async (request, h) => {
   });
 
   const prediction = apiResponse.data.formatted_predictions;
+  const zsWeightAge = parseFloat(prediction[0]);
+  const zsHeightAge = parseFloat(prediction[1]);
+  const zsWeightHeight = parseFloat(prediction[2]);
+  const zsTotal3 = parseFloat(prediction[3]);
+  const zsTotalPercentage = parseFloat(prediction[4]);
+
+  // Menyimpan input dan hasil prediksi ke database
+  await createPrediction(
+    userId,
+    name,
+    gender,
+    age,
+    height,
+    weight,
+    zsWeightAge,
+    zsHeightAge,
+    zsWeightHeight,
+    zsTotal3,
+    zsTotalPercentage,
+  );
 
   const response = h.response({
     status: 'success',
@@ -317,11 +341,17 @@ const predictionHandler = async (request, h) => {
         ...data,
       },
       prediction: {
-        zsWeightAge: prediction[0],
-        zsHeightAge: prediction[1],
-        zsWeightHeight: prediction[2],
-        zsTotal: prediction[3],
-        zsTotalPercentage: prediction[4],
+        zsWeightAge,
+        zsHeightAge,
+        zsWeightHeight,
+        zsTotal: zsTotal3,
+        zsTotalPercentage,
+      },
+      description: {
+        weightAge: classifyWeightStatus(zsWeightAge),
+        heightAge: classifyBMI(zsHeightAge),
+        weightHeight: calculateBMI(zsWeightHeight),
+        conclusion: conclusionClassify(zsTotal3),
       },
     },
   });
