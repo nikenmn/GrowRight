@@ -8,7 +8,7 @@ const {
 } = require('../controller/predictDecriptionController');
 const emailValidation = require('../validator/emailValidator');
 const { containsSymbolAndNumber, passwordLengthValidation, isValidPassword } = require('../validator/PasswordValidator');
-const { createPrediction } = require('../model/predictionModel');
+const { createPrediction, getPrediction } = require('../model/predictionModel');
 const {
   createUser,
   updateUser,
@@ -359,6 +359,56 @@ const predictionHandler = async (request, h) => {
   return response;
 };
 
+const predictionHistoryHandler = async (request, h) => {
+  const { credentials } = request.auth;
+  const { userId } = request.params;
+
+  if (credentials.userId !== userId) {
+    const response = h.response({
+      status: 'fail',
+      message: 'Unauthorized',
+    });
+    response.code(401);
+    return response;
+  }
+
+  const history = await getPrediction(userId);
+
+  // if (!history || history.length === 0) {
+  //   const response = h.response({
+  //     status: 'No Content',
+  //   });
+  //   response.code(204); // 204 No Content
+  //   return response;
+  // }
+
+  const processedHistory = history.map((item) => ({
+    id: item.id,
+    input: {
+      name: item.name,
+      gender: item.gender,
+      age: item.age,
+      weight: item.weight,
+      height: item.height,
+    },
+    prediction: {
+      zsWeightAge: item.zsWeightAge,
+      zsHeightAge: item.zsHeightAge,
+      zsWeightHeight: item.zsWeightHeight,
+      zsTotal: item.zsTotal3,
+      zsTotalPercentage: item.zsTotalPercentage,
+    },
+    createDat: item.createDat,
+  }));
+
+  const response = h.response({
+    status: 'success',
+    data: processedHistory,
+  });
+  response.code(200);
+  return response;
+};
+
 module.exports = {
   registerUser,
   loginHandler,
@@ -367,4 +417,5 @@ module.exports = {
   getUserProfile,
   editUserProfile,
   predictionHandler,
+  predictionHistoryHandler,
 };

@@ -24,6 +24,17 @@ const createPrediction = async (
   return result;
 };
 
+const getPrediction = async (userId) => {
+  const db = await initializeDb();
+  const [result] = await db.query(
+    'SELECT * FROM predictions WHERE userId = ?',
+    // 'SELECT * FROM predictions WHERE (userId) VALUES (?)',
+    [userId],
+  );
+  return result;
+};
+
 module.exports = {
   createPrediction,
+  getPrediction,
 };

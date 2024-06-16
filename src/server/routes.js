@@ -6,6 +6,7 @@ const {
   getUserProfile,
   editUserProfile,
   predictionHandler,
+  predictionHistoryHandler,
 } = require('./handler');
 
 const routes = [
@@ -67,6 +68,11 @@ const routes = [
     method: 'POST',
     path: '/prediction/{userId}',
     handler: predictionHandler,
+  },
+  {
+    method: 'GET',
+    path: '/prediction/{userId}',
+    handler: predictionHistoryHandler,
   },
 ];
 
