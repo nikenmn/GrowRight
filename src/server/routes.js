@@ -10,6 +10,21 @@ const {
 
 const routes = [
   {
+    method: '*',
+    path: '/',
+    options: {
+      auth: false,
+    },
+    handler: (request, h) => {
+      const response = h.response({
+        status: 'success',
+        message: 'Welcome to the GrowRight API ;)',
+      });
+      response.code(200);
+      return response;
+    },
+  },
+  {
     method: 'POST',
     path: '/register',
     options: {
